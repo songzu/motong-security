@@ -1,9 +1,8 @@
 package io.renren.modules.wechat.controller;
 
-import cn.binarywang.wx.miniapp.api.WxMaService;
-import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
-import io.renren.common.config.WxMaConfiguration;
-import io.renren.common.model.BindeCustomerModel;
+import io.renren.common.config.JwtConfig;
+import io.renren.common.exception.RRException;
+import io.renren.common.model.CustomerBindeModel;
 import io.renren.common.model.CodeModel;
 import io.renren.common.utils.FunctionUtil;
 import io.renren.common.utils.R;
@@ -13,7 +12,6 @@ import io.renren.modules.sys.service.CustomerInfoService;
 import io.renren.common.utils.JsonUtils;
 import io.renren.modules.wechat.service.WeChatService;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.error.WxErrorException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +43,9 @@ public class WeChatController {
     @Resource
     private CustomerInfoDao customerInfoDao;
 
+    @Resource
+    private JwtConfig jwtConfig;
+
     protected HttpServletRequest request;
     protected HttpServletResponse response;
     protected HttpSession session;
@@ -55,26 +56,6 @@ public class WeChatController {
         this.response = res;
         this.session = req.getSession();
     }
-
-//    @Resource
-//    private WeChatService weChatService;
-//
-//    @RequestMapping(value = "/getsessionid", method = RequestMethod.POST)
-//    public R getSessionId(@RequestParam("code") String code) {
-//        log.info("授权码,code:[{}]",code);
-//        try {
-//            if (StringUtils.isBlank(code)) {
-//                return R.error("参数不能为空");
-//            }
-//
-//            Object object = weChatService.getSessionIdByCode(code);
-//            log.info("/sesion/getsessionid object{}", object);
-//            return R.ok().put("object", object);
-//        } catch (Exception e) {
-//            log.error("/sesion/getsessionid 异常", e);
-//            return R.error("服务异常");
-//        }
-//    }
 
     /**
      * 登陆接口
@@ -98,8 +79,22 @@ public class WeChatController {
      * @return
      */
     @RequestMapping(value = "/binde", method = RequestMethod.POST)
-    public R bindeCustomer(@RequestBody BindeCustomerModel bindeCustomerModel) {
-        //1.参数校验
+    public R bindeCustomer(@RequestBody CustomerBindeModel bindeCustomerModel) {
+        log.info("用户绑定请求,[{}]", JsonUtils.toJson(bindeCustomerModel));
+
+        //1.token校验
+        try {
+            String wxOpenId = checkToken();
+            bindeCustomerModel.setWeChatOpenId(wxOpenId);
+        } catch (RRException e) {
+            log.warn("用户未登陆,[{}]", e);
+            return R.error(99, "用户未登陆");
+        } catch (Exception e) {
+            log.warn("用户未登陆,[{}]", e);
+            return R.error(99, "用户未登陆");
+        }
+
+        //2.参数校验
         if (bindeCustomerModel == null) {
             return R.error(99, "请求参数不能为空");
         }
@@ -109,44 +104,17 @@ public class WeChatController {
         if (StringUtils.isBlank(bindeCustomerModel.getPassword())) {
             return R.error(99, "密码不能为空");
         }
-        if (StringUtils.isBlank(bindeCustomerModel.getWeChatOpenId())) {
-            return R.error(99, "微信id不能为空");
-        }
+//        if (StringUtils.isBlank(bindeCustomerModel.getWeChatOpenId())) {
+//            return R.error(99, "微信id不能为空");
+//        }
         if (StringUtils.isBlank(bindeCustomerModel.getWeChatNickName())) {
             return R.error(99, "微信昵称不能为空");
         }
 
-        //2.查询
-        List<CustomerInfoEntity> customerInfoList = customerInfoDao.query(bindeCustomerModel.getUserName(), bindeCustomerModel.getPassword());
-        //3.存在性校验
-        if (CollectionUtils.isEmpty(customerInfoList)) {
-            return R.error(100, "用户信息不存在");
-        }
-        //4.绑定校验
-        List<CustomerInfoEntity> usedCustomerInfos = FunctionUtil.filter(customerInfoList, data -> data.getWeChatOpenId().equals(bindeCustomerModel.getWeChatOpenId()));
-        if (!CollectionUtils.isEmpty(usedCustomerInfos)) {
-            return R.error(101, "当前微信已绑定");
-        }
-        //5.绑定
-        List<CustomerInfoEntity> customerInfoFilter = FunctionUtil.filter(customerInfoList, data -> data.getBindeStatus() == 0);
-        if (!CollectionUtils.isEmpty(customerInfoFilter)) {
-            //5.1有未绑定记录-更新
-            CustomerInfoEntity customerInfoEntity = customerInfoFilter.get(0);
-            customerInfoEntity.setBindeStatus(1);
-            customerInfoEntity.setWeChatNickName(bindeCustomerModel.getWeChatNickName());
-            customerInfoEntity.setWeChatOpenId(bindeCustomerModel.getWeChatOpenId());
-            customerInfoService.updateById(customerInfoEntity);
-        } else {
-            //5.1无未绑定记录-新增
-            CustomerInfoEntity customerInfoEntity = customerInfoList.get(0);
-            customerInfoEntity.setId(null);
-            customerInfoEntity.setBindeStatus(1);
-            customerInfoEntity.setWeChatNickName(bindeCustomerModel.getWeChatNickName());
-            customerInfoEntity.setWeChatOpenId(bindeCustomerModel.getWeChatOpenId());
-            customerInfoService.save(customerInfoEntity);
-        }
+        R result = customerInfoService.bindeCustomer(bindeCustomerModel);
+        log.info("用户绑定结果,[{}]", JsonUtils.toJson(result));
 
-        return R.ok();
+        return result;
     }
 
     /**
@@ -164,7 +132,6 @@ public class WeChatController {
             String value = request.getHeader(name);
             System.out.println(name + "===========" + value);
         }
-
 
         //1.参数校验
         if (StringUtils.isBlank(wechaId)) {
@@ -190,5 +157,30 @@ public class WeChatController {
         return R.ok().put("data", customerInfoEntity);
     }
 
+    public String checkToken() {
+        String jwtToken = request.getHeader("Authorization");
+        if (StringUtils.isEmpty(jwtToken)) {
+            log.warn("token is invalid , please check your token");
+            throw new RRException("token is invalid , please check your token");
+        }
+        log.info("token[{}]", jwtToken);
+        String wxOpenId = jwtConfig.getWxOpenIdByToken(jwtToken);
+        String sessionKey = jwtConfig.getSessionKeyByToken(jwtToken);
+        if (StringUtils.isEmpty(wxOpenId)) {
+            log.warn("user account not exits , please check your token");
+            throw new RRException("user account not exits , please check your token");
+
+        }
+        if (StringUtils.isEmpty(sessionKey)) {
+            log.warn("sessionKey is invalid , please check your token");
+            throw new RRException("sessionKey is invalid , please check your token");
+        }
+        if (!jwtConfig.verifyToken(jwtToken)) {
+            log.warn("token is invalid , please check your token");
+            throw new RRException("token is invalid , please check your token");
+        }
+
+        return wxOpenId;
+    }
 
 }

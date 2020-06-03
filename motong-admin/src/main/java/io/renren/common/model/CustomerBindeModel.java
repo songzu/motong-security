@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank;
  * @version $$ Id: BindeCustomerModel.java, V 0.1 2020/6/1 23:04 gengen.wang Exp $$
  **/
 @Data
-public class BindeCustomerModel {
+public class CustomerBindeModel {
 
     /**
      * 用户名

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
+import io.renren.common.utils.JsonUtils;
 import io.renren.common.validator.ValidatorUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -40,7 +41,7 @@ public class CustomerInfoController {
      */
     @RequestMapping("/list")
     @RequiresPermissions("sys:customerinfo:list")
-    public R list(@RequestParam Map<String, Object> params){
+    public R list(@RequestParam Map<String, Object> params) {
         PageUtils page = customerInfoService.queryPage(params);
 
         return R.ok().put("page", page);
@@ -52,7 +53,7 @@ public class CustomerInfoController {
      */
     @RequestMapping("/info/{id}")
     @RequiresPermissions("sys:customerinfo:info")
-    public R info(@PathVariable("id") Long id){
+    public R info(@PathVariable("id") Long id) {
         CustomerInfoEntity customerInfo = customerInfoService.getById(id);
 
         return R.ok().put("customerInfo", customerInfo);
@@ -63,7 +64,7 @@ public class CustomerInfoController {
      */
     @RequestMapping("/save")
     @RequiresPermissions("sys:customerinfo:save")
-    public R save(@RequestBody CustomerInfoEntity customerInfo){
+    public R save(@RequestBody CustomerInfoEntity customerInfo) {
         customerInfo.setBindeStatus(0);
         customerInfo.setValidStatus(0);
         customerInfo.setStatus(1);
@@ -79,10 +80,10 @@ public class CustomerInfoController {
      */
     @RequestMapping("/update")
     @RequiresPermissions("sys:customerinfo:update")
-    public R update(@RequestBody CustomerInfoEntity customerInfo){
+    public R update(@RequestBody CustomerInfoEntity customerInfo) {
         ValidatorUtils.validateEntity(customerInfo);
         customerInfoService.updateById(customerInfo);
-        
+
         return R.ok();
     }
 
@@ -91,7 +92,7 @@ public class CustomerInfoController {
      */
     @RequestMapping("/delete")
     @RequiresPermissions("sys:customerinfo:delete")
-    public R delete(@RequestBody Long[] ids){
+    public R delete(@RequestBody Long[] ids) {
         customerInfoService.removeByIds(Arrays.asList(ids));
 
         return R.ok();
@@ -102,7 +103,7 @@ public class CustomerInfoController {
      */
     @RequestMapping("/waitConfirmlist")
     @RequiresPermissions("sys:customerinfo:list")
-    public R waitConfirmlist(@RequestParam Map<String, Object> params){
+    public R waitConfirmlist(@RequestParam Map<String, Object> params) {
         params.put("validStatus", 0);
         params.put("bindeStatus", 1);
         PageUtils page = customerInfoService.queryPage(params);
@@ -115,10 +116,10 @@ public class CustomerInfoController {
      */
     @RequestMapping("/conf")
     @RequiresPermissions("sys:customerinfo:delete")
-    public R confirm(@RequestBody Long[] ids){
-
-        Integer num = customerInfoService.confirm(ids);
-        log.info("确认记录,num:[{}]",num);
+    public R confirm(@RequestBody Long[] ids) {
+        log.info("用户确认请求,[{}]", JsonUtils.toJson(ids));
+        R result = customerInfoService.confirm(ids);
+        log.info("用户确认结果,result:[{}]", JsonUtils.toJson(result));
 
         return R.ok();
     }
