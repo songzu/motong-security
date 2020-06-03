@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>客户信息</title>
+		<#include "/header.html">
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+            <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+            <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+														                    <div class="form-group">
+                        <div class="col-sm-2 control-label">昵称</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="customerInfo.nickName" placeholder="昵称"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">用户名</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="customerInfo.userName" placeholder="用户名"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">密码</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="customerInfo.password" placeholder="密码"/>
+                        </div>
+                    </div>
+<!--											                    <div class="form-group">-->
+<!--                        <div class="col-sm-2 control-label">微信唯一id</div>-->
+<!--                        <div class="col-sm-10">-->
+<!--                            <input type="text" class="form-control" v-model="customerInfo.weChatOpenId" placeholder="微信唯一id"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--											                    <div class="form-group">-->
+<!--                        <div class="col-sm-2 control-label">微信昵称</div>-->
+<!--                        <div class="col-sm-10">-->
+<!--                            <input type="text" class="form-control" v-model="customerInfo.weChatNickName" placeholder="微信昵称"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">参数A</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="customerInfo.paramA" placeholder="参数A"/>
+                        </div>
+                    </div>
+											                    <div class="form-group">
+                        <div class="col-sm-2 control-label">参数B</div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="customerInfo.paramB" placeholder="参数B"/>
+                        </div>
+                    </div>
+<!--											                    <div class="form-group">-->
+<!--                        <div class="col-sm-2 control-label">生效状态，0-无效，1-有效</div>-->
+<!--                        <div class="col-sm-10">-->
+<!--                            <input type="text" class="form-control" v-model="customerInfo.validStatus" placeholder="生效状态，0-无效，1-有效"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--											                    <div class="form-group">-->
+<!--                        <div class="col-sm-2 control-label">绑定状态，0-未绑定，1-绑定</div>-->
+<!--                        <div class="col-sm-10">-->
+<!--                            <input type="text" class="form-control" v-model="customerInfo.bindeStatus" placeholder="绑定状态，0-未绑定，1-绑定"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--											                    <div class="form-group">-->
+<!--                        <div class="col-sm-2 control-label">删除状态，0-删除，1-未删除</div>-->
+<!--                        <div class="col-sm-10">-->
+<!--                            <input type="text" class="form-control" v-model="customerInfo.status" placeholder="删除状态，0-删除，1-未删除"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--											                    <div class="form-group">-->
+<!--                        <div class="col-sm-2 control-label">创建时间</div>-->
+<!--                        <div class="col-sm-10">-->
+<!--                            <input type="text" class="form-control" v-model="customerInfo.gmtCreate" placeholder="创建时间"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--											                    <div class="form-group">-->
+<!--                        <div class="col-sm-2 control-label">修改时间</div>-->
+<!--                        <div class="col-sm-10">-->
+<!--                            <input type="text" class="form-control" v-model="customerInfo.gmtUpdate" placeholder="修改时间"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--											                    <div class="form-group">-->
+<!--                        <div class="col-sm-2 control-label">创建人姓名</div>-->
+<!--                        <div class="col-sm-10">-->
+<!--                            <input type="text" class="form-control" v-model="customerInfo.userCreate" placeholder="创建人姓名"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--											                    <div class="form-group">-->
+<!--                        <div class="col-sm-2 control-label">创建人id</div>-->
+<!--                        <div class="col-sm-10">-->
+<!--                            <input type="text" class="form-control" v-model="customerInfo.userCreateId" placeholder="创建人id"/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+							            <div class="form-group">
+                <div class="col-sm-2 control-label"></div>
+                <input type="button" class="btn btn-primary" id="btnSaveOrUpdate" data-loading-text="保存中..." @click="saveOrUpdate" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="${request.contextPath}/statics/js/modules/sys/customerinfo.js?_${.now?long}"></script>
+</body>
+</html>

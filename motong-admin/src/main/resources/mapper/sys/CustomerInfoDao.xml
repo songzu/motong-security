@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.sys.dao.CustomerInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.renren.modules.sys.entity.CustomerInfoEntity" id="customerInfoMap">
+        <result property="id" column="id"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="userName" column="user_name"/>
+        <result property="password" column="password"/>
+        <result property="weChatOpenId" column="we_chat_open_id"/>
+        <result property="weChatNickName" column="we_chat_nick_name"/>
+        <result property="paramA" column="param_a"/>
+        <result property="paramB" column="param_b"/>
+        <result property="validStatus" column="valid_status"/>
+        <result property="bindeStatus" column="binde_status"/>
+        <result property="status" column="status"/>
+        <result property="gmtCreate" column="gmt_create"/>
+        <result property="gmtUpdate" column="gmt_update"/>
+        <result property="userCreate" column="user_create"/>
+        <result property="userCreateId" column="user_create_id"/>
+    </resultMap>
+
+    <select id="confirm" parameterType="java.util.ArrayList" resultType="java.lang.Integer">
+        update customer_info
+        set valid_status = 1
+        <where>
+            id in (
+            <foreach collection="ids"  item="id" index="index" separator=",">
+                #{id}
+            </foreach>
+            )
+            and status = 1;
+        </where>
+    </select>
+
+
+</mapper>
