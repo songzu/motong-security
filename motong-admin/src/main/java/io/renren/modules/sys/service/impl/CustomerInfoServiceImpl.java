@@ -1,27 +1,22 @@
 package io.renren.modules.sys.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Lists;
 import io.renren.common.model.CustomerBindeModel;
 import io.renren.common.utils.*;
-import io.renren.modules.sys.entity.SysDeptEntity;
-import io.renren.modules.sys.entity.SysUserEntity;
+import io.renren.modules.sys.dao.CustomerInfoDao;
+import io.renren.modules.sys.entity.CustomerInfoEntity;
+import io.renren.modules.sys.service.CustomerInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-import io.renren.modules.sys.dao.CustomerInfoDao;
-import io.renren.modules.sys.entity.CustomerInfoEntity;
-import io.renren.modules.sys.service.CustomerInfoService;
-
-import javax.annotation.Resource;
 
 @Slf4j
 @Service("customerInfoService")
@@ -72,7 +67,7 @@ public class CustomerInfoServiceImpl extends ServiceImpl<CustomerInfoDao, Custom
                 return R.error(100, "用户信息不存在");
             }
             //3.绑定校验
-            List<CustomerInfoEntity> usedCustomerInfos = FunctionUtil.filter(customerInfoList, data -> data.getWeChatOpenId().equals(bindeCustomerModel.getWeChatOpenId()));
+            List<CustomerInfoEntity> usedCustomerInfos = FunctionUtil.filter(customerInfoList, data -> bindeCustomerModel.getWeChatOpenId().equals(data.getWeChatOpenId()));
             if (!CollectionUtils.isEmpty(usedCustomerInfos)) {
                 return R.error(101, "当前微信已绑定");
             }

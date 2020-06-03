@@ -1,12 +1,9 @@
 package io.renren.modules.wechat.service.impl;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
-import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
-import cn.binarywang.wx.miniapp.config.impl.WxMaDefaultConfigImpl;
 import io.renren.common.config.JwtConfig;
 import io.renren.common.config.WxMaConfiguration;
-import io.renren.common.model.CodeModel;
 import io.renren.common.model.TokenModel;
 import io.renren.common.utils.JsonUtils;
 import io.renren.common.utils.R;
@@ -16,8 +13,6 @@ import io.renren.modules.wechat.service.WeChatService;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
