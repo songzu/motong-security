@@ -23,5 +23,7 @@ public interface CustomerInfoService extends IService<CustomerInfoEntity> {
     R confirm(Long[] ids);
 
     R bindeCustomer(CustomerBindeModel bindeCustomerModel);
+
+    R customerDetail(String wechaId);
 }
 

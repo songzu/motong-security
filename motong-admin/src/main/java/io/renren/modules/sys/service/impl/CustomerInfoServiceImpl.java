@@ -102,4 +102,32 @@ public class CustomerInfoServiceImpl extends ServiceImpl<CustomerInfoDao, Custom
         }
     }
 
+    @Override
+    public R customerDetail(String wxOpenId) {
+
+        try {
+            //1.查询
+            List<CustomerInfoEntity> customerInfoList = customerInfoDao.queryByWechatId(wxOpenId);
+            if (CollectionUtils.isEmpty(customerInfoList)) {
+                return R.error(100, "用户信息不存在");
+            } else if (customerInfoList.size() != 1) {
+                return R.error(101, "用户信息大于1条");
+            }
+            //2.状态判断
+            CustomerInfoEntity customerInfoEntity = customerInfoList.get(0);
+            if (customerInfoEntity.getBindeStatus() != 1) {
+                return R.error(101, "用户信息未绑定");
+            }
+            if (customerInfoEntity.getValidStatus() != 1) {
+                return R.error(101, "用户信息未生效");
+            }
+
+            return R.ok().put("data", customerInfoEntity);
+        } catch (Exception e) {
+            log.info("查询用户信息失败,wxOpenId[{}],[{}]", wxOpenId, e);
+            return R.error(101, "查询用户信息失败");
+        }
+
+    }
+
 }

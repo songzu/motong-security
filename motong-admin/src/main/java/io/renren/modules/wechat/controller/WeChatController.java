@@ -2,17 +2,13 @@ package io.renren.modules.wechat.controller;
 
 import io.renren.common.config.JwtConfig;
 import io.renren.common.exception.RRException;
-import io.renren.common.model.CustomerBindeModel;
 import io.renren.common.model.CodeModel;
-import io.renren.common.utils.FunctionUtil;
-import io.renren.common.utils.R;
-import io.renren.modules.sys.dao.CustomerInfoDao;
-import io.renren.modules.sys.entity.CustomerInfoEntity;
-import io.renren.modules.sys.service.CustomerInfoService;
+import io.renren.common.model.CustomerBindeModel;
 import io.renren.common.utils.JsonUtils;
+import io.renren.common.utils.R;
+import io.renren.modules.sys.service.CustomerInfoService;
 import io.renren.modules.wechat.service.WeChatService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +16,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.util.Enumeration;
-import java.util.List;
 
 /**
  * <p></p>
@@ -39,9 +33,6 @@ public class WeChatController {
 
     @Resource
     private WeChatService weChatService;
-
-    @Resource
-    private CustomerInfoDao customerInfoDao;
 
     @Resource
     private JwtConfig jwtConfig;
@@ -104,9 +95,6 @@ public class WeChatController {
         if (StringUtils.isBlank(bindeCustomerModel.getPassword())) {
             return R.error(99, "密码不能为空");
         }
-//        if (StringUtils.isBlank(bindeCustomerModel.getWeChatOpenId())) {
-//            return R.error(99, "微信id不能为空");
-//        }
         if (StringUtils.isBlank(bindeCustomerModel.getWeChatNickName())) {
             return R.error(99, "微信昵称不能为空");
         }
@@ -120,44 +108,28 @@ public class WeChatController {
     /**
      * 用户详情
      *
-     * @param wechaId
      * @return
      */
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
-    public R customerDetail(String wechaId) {
-
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String name = headerNames.nextElement();
-            String value = request.getHeader(name);
-            System.out.println(name + "===========" + value);
+    public R customerDetail() {
+        //1.token校验
+        String wxOpenId;
+        try {
+            wxOpenId = checkToken();
+        } catch (RRException e) {
+            log.warn("用户未登陆,[{}]", e);
+            return R.error(99, "用户未登陆");
+        } catch (Exception e) {
+            log.warn("用户未登陆,[{}]", e);
+            return R.error(99, "用户未登陆");
         }
 
-        //1.参数校验
-        if (StringUtils.isBlank(wechaId)) {
-            return R.error(99, "请求参数不能为空");
-        }
-        //2.查询
-        List<CustomerInfoEntity> customerInfoList = customerInfoDao.queryByWechatId(wechaId);
-        if (CollectionUtils.isEmpty(customerInfoList)) {
-            return R.error(100, "用户信息不存在");
-        } else if (customerInfoList.size() != 1) {
-            return R.error(101, "用户信息大于1条");
-        }
-        //3.状态判断
-        CustomerInfoEntity customerInfoEntity = customerInfoList.get(0);
-        if (customerInfoEntity.getBindeStatus() != 1) {
-            return R.error(101, "用户信息未绑定");
-        }
-        if (customerInfoEntity.getValidStatus() != 1) {
-            return R.error(101, "用户信息未生效");
-        }
-
-        log.info("用户详情,wechaId[{}],result[{}]", wechaId, JsonUtils.toJson(customerInfoEntity));
-        return R.ok().put("data", customerInfoEntity);
+        R result = customerInfoService.customerDetail(wxOpenId);
+        log.info("用户详情,wxOpenId[{}],result[{}]", wxOpenId, JsonUtils.toJson(result));
+        return result;
     }
 
-    public String checkToken() {
+    private String checkToken() {
         String jwtToken = request.getHeader("Authorization");
         if (StringUtils.isEmpty(jwtToken)) {
             log.warn("token is invalid , please check your token");
