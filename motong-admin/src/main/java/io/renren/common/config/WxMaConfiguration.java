@@ -58,7 +58,7 @@ public class WxMaConfiguration {
     public void init() {
         List<WxMaProperties.Config> configs = this.properties.getConfigs();
         if (configs == null) {
-            throw new RuntimeException("大哥，拜托先看下项目首页的说明（readme文件），添加下相关配置，注意别配错了！");
+            throw new RuntimeException("小程序信息未配置");
         }
 
         maServices = configs.stream()
