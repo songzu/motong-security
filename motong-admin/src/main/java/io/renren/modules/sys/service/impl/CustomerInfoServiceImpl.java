@@ -85,6 +85,7 @@ public class CustomerInfoServiceImpl extends ServiceImpl<CustomerInfoDao, Custom
                 CustomerInfoEntity customerInfoEntity = customerInfoList.get(0);
                 customerInfoEntity.setId(null);
                 customerInfoEntity.setBindeStatus(1);
+                customerInfoEntity.setValidStatus(0);
                 customerInfoEntity.setWeChatNickName(bindeCustomerModel.getWeChatNickName());
                 customerInfoEntity.setWeChatOpenId(bindeCustomerModel.getWeChatOpenId());
                 this.save(customerInfoEntity);
