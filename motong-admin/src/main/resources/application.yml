@@ -6,11 +6,11 @@ server:
     min-spare-threads: 30
   port: 8080
   servlet:
-    context-path: /renren-admin
+    context-path: /motong-admin
 
 spring:
   profiles:
-    active: dev
+    active: prod
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
@@ -21,7 +21,7 @@ spring:
       enabled: true
   redis:
     database: 0
-    host: 47.110.237.29
+    host: 47.94.8.225
     port: 6379
     password:      # 密码（默认为空）
     timeout: 6000ms  # 连接超时时长（毫秒）

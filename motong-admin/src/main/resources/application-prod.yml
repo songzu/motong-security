@@ -3,7 +3,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://47.110.237.29:3306/renren_security?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+      url: jdbc:mysql://47.94.8.225:3306/db_motone?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
       username: root
       password: root
       initial-size: 10
@@ -14,8 +14,7 @@ spring:
       max-pool-prepared-statement-per-connection-size: 20
       time-between-eviction-runs-millis: 60000
       min-evictable-idle-time-millis: 300000
-      #Oracle需要打开注释
-      #validation-query: SELECT 1 FROM DUAL
+
       test-while-idle: true
       test-on-borrow: false
       test-on-return: false
@@ -32,3 +31,12 @@ spring:
         wall:
           config:
             multi-statement-allow: true
+
+wx:
+  miniapp:
+    configs:
+      - appid: wx1c4367f2f8a50fd4
+        secret: 36296aed600fd8bcfe1fb5ade711dc6b
+        token: #微信小程序消息服务器配置的token
+        aesKey: #微信小程序消息服务器配置的EncodingAESKey
+        msgDataFormat: JSON
