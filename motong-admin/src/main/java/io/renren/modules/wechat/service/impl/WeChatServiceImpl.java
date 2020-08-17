@@ -34,7 +34,7 @@ public class WeChatServiceImpl implements WeChatService {
     @Resource
     private CustomerInfoDao customerInfoDao;
 
-    private String appid = "wxc1accff3513d2cc9";
+    private String appid = "wx1c4367f2f8a50fd4";
 
     @Override
     public R login(String code) {
